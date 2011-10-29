@@ -1,0 +1,16 @@
+Usage: traffic_control.py [options]
+        -a -n ifname -i ipaddress -r rate
+        -d -i ipaddress
+        -s -i ipaddress
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -a, --add             add or replace filter
+  -d, --delete          delete filter
+  -n IFNAME             network interface card
+  -s, --show            list exist filter
+  -i IPADDRESS          ipaddress
+  -R                    reload config
+  -r RATE, --rate=RATE  limit rate in mbit
+  -v, --verbose         show debugging information while running
