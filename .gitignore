@@ -1,0 +1,5 @@
+.DS_Store
+*.pyc
+logs/*.log
+.ropeproject
+documents/

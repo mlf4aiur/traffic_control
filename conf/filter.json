@@ -1,0 +1,14 @@
+{
+    "1.2.3.5": {
+        "flowid": "1:15", 
+        "ifname": "eth0", 
+        "rate": "2Mbit", 
+        "vmname": "test01"
+    }, 
+    "1.2.3.7": {
+        "flowid": "1:20", 
+        "ifname": "eth0", 
+        "rate": "3Mbit", 
+        "vmname": "test07"
+    }
+}
