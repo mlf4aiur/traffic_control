@@ -24,7 +24,6 @@ logging.config.fileConfig('conf/logging.cfg')
 
 
 class TrafficControl(object):
-    """docstring for TrafficControl"""
 
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -60,21 +59,17 @@ class TrafficControl(object):
         return class_id
 
     def add_class(self, ifname, rate, class_id):
-        self.logger.debug('add class ifname: %s, rate: %s, class_id: %s' \
-                %(ifname, rate, class_id))
-        '''
-        print('/sbin/tc class add dev %s parent 1:0 classid 1:%s htb \
-                rate %s burst 15Kb' % (ifname, class_id, rate))
-        '''
-        call('/sbin/tc class add dev %s parent 1:0 classid 1:%s htb \
-                rate %s burst 15Kb' % (ifname, class_id, rate), \
+        self.logger.debug('add class ifname: %s, rate: %s, class_id: %s'
+                % (ifname, rate, class_id))
+        self.logger.debug('/sbin/tc class add dev %s parent 1:0 classid 1:%s '
+                'htb rate %s burst 15Kb' % (ifname, class_id, rate))
+        call('/sbin/tc class add dev %s parent 1:0 classid 1:%s htb '
+                'rate %s burst 15Kb' % (ifname, class_id, rate),
                 shell=True, stderr=STDOUT, stdout=None)
-        '''
-        print('/sbin/tc qdisc add dev %s parent 1:%s handle %s:0 sfq \
-                perturb 10' % (ifname, class_id, class_id))
-        '''
-        call('/sbin/tc qdisc add dev %s parent 1:%s handle %s:0 sfq \
-                perturb 10' % (ifname, class_id, class_id), \
+        self.logger.debug('/sbin/tc qdisc add dev %s parent 1:%s handle %s:0 '
+                'sfq perturb 10' % (ifname, class_id, class_id))
+        call('/sbin/tc qdisc add dev %s parent 1:%s handle %s:0 sfq perturb 10'
+                % (ifname, class_id, class_id),
                 shell=True, stderr=STDOUT, stdout=None)
         return
 
@@ -84,9 +79,7 @@ class TrafficControl(object):
             rates = json.loads(fp.read())
             fp.close()
         except Exception, err:
-            exstr = traceback.format_exc()
             self.logger.error(err)
-            self.logger.error(exstr)
             rates = {}
         return rates
 
@@ -97,9 +90,7 @@ class TrafficControl(object):
             fp.write(result + '\n')
             fp.close()
         except Exception, err:
-            exstr = traceback.format_exc()
             self.logger.error(err)
-            self.logger.error(exstr)
         return
 
     def load_filter(self):
@@ -147,23 +138,23 @@ class TrafficControl(object):
         flowid = "1:" + str(flowid)
         self.filters[ipaddress] = FilterRule(flowid, ifname, rate)
         # run add tc filter command
-        self.logger.debug('/sbin/tc filter add dev %s parent %s protocol ip \
-                prio %d %s match ip src %s match ip dst 0.0.0.0/0 flowid %s' \
-                % (ifname, self.parent, self.priority, self.classifier, \
-                ipaddress, flowid))
-        call('/sbin/tc filter add dev %s parent %s protocol ip prio %d \
-                %s match ip src %s match ip dst 0.0.0.0/0 flowid %s' \
-                % (ifname, self.parent, self.priority, self.classifier, \
-                ipaddress, flowid), \
+        self.logger.debug('/sbin/tc filter add dev %s parent %s protocol ip '
+                'prio %d %s match ip src %s match ip dst 0.0.0.0/0 flowid %s'
+                % (ifname, self.parent, self.priority, self.classifier,
+                    ipaddress, flowid))
+        call('/sbin/tc filter add dev %s parent %s protocol ip prio %d '
+                '%s match ip src %s match ip dst 0.0.0.0/0 flowid %s'
+                % (ifname, self.parent, self.priority, self.classifier,
+                    ipaddress, flowid),
                 shell=True, stderr=STDOUT, stdout=None)
-        self.logger.debug('/sbin/tc filter add dev %s parent %s protocol ip \
-                prio %d %s match ip src 0.0.0.0/0 match ip dst %s flowid %s' \
-                % (ifname, self.parent, self.priority, self.classifier, \
-                ipaddress, flowid))
-        call('/sbin/tc filter add dev %s parent %s protocol ip prio %d \
-                %s match ip src 0.0.0.0/0 match ip dst %s flowid %s' \
-                % (ifname, self.parent, self.priority, self.classifier, \
-                ipaddress, flowid), \
+        self.logger.debug('/sbin/tc filter add dev %s parent %s protocol ip '
+                'prio %d %s match ip src 0.0.0.0/0 match ip dst %s flowid %s'
+                % (ifname, self.parent, self.priority, self.classifier,
+                    ipaddress, flowid))
+        call('/sbin/tc filter add dev %s parent %s protocol ip prio %d '
+                '%s match ip src 0.0.0.0/0 match ip dst %s flowid %s'
+                % (ifname, self.parent, self.priority, self.classifier,
+                    ipaddress, flowid),
                 shell=True, stderr=STDOUT, stdout=None)
         if save:
             self.save_filter(self.filters)
@@ -172,22 +163,22 @@ class TrafficControl(object):
     def search_real_filter(self, ifname, ipaddress):
         '''
         # tc filter list dev eth0
-        filter parent 1: protocol ip pref 2 u32 
-        filter parent 1: protocol ip pref 2 u32 fh 800: ht divisor 1 
+        filter parent 1: protocol ip pref 2 u32
+        filter parent 1: protocol ip pref 2 u32 fh 800: ht divisor 1
         filter parent 1: protocol ip pref 2 u32 fh 800::800 order 2048 key \
-            ht 800 bkt 0 flowid 1:15 
+            ht 800 bkt 0 flowid 1:15
           match 01020305/ffffffff at 12
           match 00000000/00000000 at 16
         filter parent 1: protocol ip pref 2 u32 fh 800::801 order 2049 key \
-            ht 800 bkt 0 flowid 1:15 
+            ht 800 bkt 0 flowid 1:15
           match 00000000/00000000 at 12
           match 01020305/ffffffff at 16
         filter parent 1: protocol ip pref 2 u32 fh 800::802 order 2050 key \
-            ht 800 bkt 0 flowid 1:40 
+            ht 800 bkt 0 flowid 1:40
           match 01020307/ffffffff at 12
           match 00000000/00000000 at 16
         filter parent 1: protocol ip pref 2 u32 fh 800::803 order 2051 key \
-            ht 800 bkt 0 flowid 1:40 
+            ht 800 bkt 0 flowid 1:40
           match 00000000/00000000 at 12
           match 01020307/ffffffff at 16
         '''
@@ -203,8 +194,8 @@ class TrafficControl(object):
         for x in range(len(result)):
             try:
                 if (re.search(re_filter, result[x]) and
-                    (re.search(re_ipaddress, result[x+1]) or
-                    re.search(re_ipaddress, result[x+2]))):
+                    (re.search(re_ipaddress, result[x + 1]) or
+                    re.search(re_ipaddress, result[x + 2]))):
                     matchs = re.search(re_filter, result[x])
                     (parent, priority, classifier, handle) = matchs.groups()
                     real_filters.append(
@@ -223,10 +214,10 @@ class TrafficControl(object):
             real_filters = self.search_real_filter(ifname, ipaddress)
             for real_filter in real_filters:
                 # destroy a filter
-                call('/sbin/tc filter del dev %s parent %s prio %d \
-                        handle %s %s' % (ifname, real_filter.parent, \
-                        real_filter.priority, real_filter.handle, \
-                        real_filter.classifier),
+                call('/sbin/tc filter del dev %s parent %s prio %d '
+                        'handle %s %s' % (ifname, real_filter.parent,
+                            real_filter.priority, real_filter.handle,
+                            real_filter.classifier),
                     shell=True, stderr=STDOUT, stdout=None)
         try:
             del(self.filters[ipaddress])
@@ -263,7 +254,6 @@ class TrafficControl(object):
             for rate in rates:
                 class_id = rates[rate]
                 self.add_class(ifname, rate, class_id)
-        rules = self.load_filter()
         for ipaddress in self.filters:
             filter_rule = self.filters[ipaddress]
             ifname = filter_rule.ifname
@@ -326,13 +316,10 @@ def controller():
             help='reload config')
     parser.add_option('-r', '--rate', action="store", type='int', dest='rate',
             help='limit rate in mbit')
-    parser.add_option('-v', '--verbose', action='store_true', dest='verbose',
-            help='show debugging information while running')
     parser.set_defaults(rate=1)
     (options, args) = parser.parse_args()
     traffic_control = TrafficControl()
-    if options.verbose:
-        log_level = DEBUG
+    traffic_control.reload()
     if options.add and options.ipaddress and options.rate and options.ifname:
         rate = str(int(options.rate)) + "Mbit"
         traffic_control.add_filter(options.ipaddress, options.ifname, rate)
